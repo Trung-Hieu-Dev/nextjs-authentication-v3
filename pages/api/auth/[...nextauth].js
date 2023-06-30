@@ -31,12 +31,11 @@ export default NextAuth({
           throw new Error("Could not log you in!");
         }
 
+        client.close();
+
         return {
           email: user.email,
         };
-
-        // close connect
-        client.close();
       },
     }),
   ],
