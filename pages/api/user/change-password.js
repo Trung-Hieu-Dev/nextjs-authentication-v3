@@ -21,17 +21,17 @@ async function handler(req, res) {
   const newPassword = req.body.newPassword;
 
   const client = await connectToDatabase();
-  const usersCollection = client.db();
+  const usersCollection = client.db().collection("users");
   const user = await usersCollection.findOne({ email: userEmail });
 
   if (!user) {
     client.close();
-    res.status(402).json({ message: "User not found!" });
+    res.status(404).json({ message: "User not found!" });
     return;
   }
 
-  const currentPassword = user.newPassword;
-  const isEqualPassword = verifyPassword(currentPassword, oldPassword);
+  const currentPassword = user.password;
+  const isEqualPassword = await verifyPassword(oldPassword, currentPassword);
 
   if (!isEqualPassword) {
     client.close();
@@ -39,7 +39,7 @@ async function handler(req, res) {
     return;
   }
 
-  const hashedPassword = hashPassword(newPassword);
+  const hashedPassword = await hashPassword(newPassword);
 
   const result = await usersCollection.updateOne(
     { email: userEmail },
